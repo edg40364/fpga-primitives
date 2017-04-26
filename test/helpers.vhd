@@ -9,7 +9,17 @@ PACKAGE helpers IS
                   phase : TIME := 0 ns);
   PROCEDURE stop_clock;
 
+  PROCEDURE rnd_no(seed1 : INOUT POSITIVE;
+                   seed2 : INOUT POSITIVE;
+                   min   : INTEGER;
+                   max   : INTEGER;
+                   value : OUT INTEGER);
+
 END PACKAGE;
+
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.math_real.ALL;
 
 PACKAGE BODY helpers IS
 
@@ -48,11 +58,23 @@ PACKAGE BODY helpers IS
       WAIT FOR high;
     END LOOP;
     WAIT;
-    END PROCEDURE;
+  END PROCEDURE;
 
-    PROCEDURE stop_clock IS
-    BEGIN
-      clocks_status.stop;
-    END PROCEDURE;
+  PROCEDURE stop_clock IS
+  BEGIN
+    clocks_status.stop;
+  END PROCEDURE;
+
+  PROCEDURE rnd_no(seed1 : INOUT POSITIVE;
+                   seed2 : INOUT POSITIVE;
+                   min   : INTEGER;
+                   max   : INTEGER;
+                   value : OUT INTEGER) IS
+    CONSTANT rng  : POSITIVE := max - min;
+    VARIABLE rand : REAL;
+  BEGIN
+    UNIFORM(seed1, seed2, rand);
+    value := INTEGER(rand * REAL(rng)) + min;
+  END PROCEDURE;
 
 END PACKAGE BODY;
