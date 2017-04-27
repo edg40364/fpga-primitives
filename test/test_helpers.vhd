@@ -1,5 +1,6 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
 
 USE work.helpers.ALL;
 
@@ -43,6 +44,7 @@ BEGIN
       REPORT "Cycle count doesn't match expected" SEVERITY ERROR;
     ASSERT count_0 = count_90 + 1
       REPORT "Phase shift count doesn't match expected" SEVERITY ERROR;
+    REPORT "Clock testing completed" SEVERITY NOTE;
     WAIT;
   END PROCESS;
 
@@ -76,6 +78,7 @@ BEGIN
       INTEGER'IMAGE(high) SEVERITY NOTE;
     ASSERT low * 3 >= high REPORT
       "Range of random values varies more than expected" SEVERITY ERROR;
+    REPORT "Random testing completed" SEVERITY NOTE;
     WAIT;
   END PROCESS;
 
@@ -87,6 +90,43 @@ BEGIN
     result := vec2hex(vector(30 DOWNTO 0));
     ASSERT result = expected REPORT "Hex mismatch, expected " &
       expected & ", got " & result SEVERITY ERROR;
+    REPORT "Hex testing completed" SEVERITY NOTE;
+    WAIT;
+  END PROCESS;
+
+  check_graycode : PROCESS
+    VARIABLE original  : std_ulogic_vector(7 DOWNTO 0);
+    VARIABLE last      : std_ulogic_vector(original'RANGE);
+    VARIABLE gray      : std_ulogic_vector(original'RANGE);
+    VARIABLE reverted  : std_ulogic_vector(original'RANGE);
+    FUNCTION bitdiff(a : std_ulogic_vector(original'RANGE);
+                     b : std_ulogic_vector(original'RANGE)) RETURN NATURAL IS
+      VARIABLE diff : NATURAL := 0;
+    BEGIN
+      FOR i IN a'RANGE LOOP
+        IF a(i) /= b(i) THEN
+          diff := diff + 1;
+        END IF;
+      END LOOP;
+      RETURN diff;
+    END FUNCTION;
+    VARIABLE changed   : NATURAL;
+  BEGIN
+    original := (OTHERS => '1');
+    last := bin2gray(original);
+    FOR i IN 0 TO 2**original'LENGTH-1 LOOP
+      original := std_ulogic_vector(TO_UNSIGNED(i, original'LENGTH));
+      gray     := bin2gray(original);
+      changed  := bitdiff(gray, last);
+      ASSERT changed = 1 REPORT "bin2gray failure, " & INTEGER'IMAGE(changed) &
+        " bits changed from " & vec2hex(last) & " to " & vec2hex(gray)
+        SEVERITY ERROR;
+      reverted := gray2bin(gray);
+      ASSERT reverted = original REPORT "gray2bin failure, expected " &
+        vec2hex(original) & ", got " & vec2hex(reverted) SEVERITY ERROR;
+      last := gray;
+    END LOOP;
+    REPORT "Graycode testing completed" SEVERITY NOTE;
     WAIT;
   END PROCESS;
 

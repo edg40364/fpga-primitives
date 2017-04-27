@@ -23,10 +23,16 @@ PACKAGE helpers IS
 
   FUNCTION vec2hex(vec : std_ulogic_vector) RETURN STRING;
 
+  FUNCTION bin2gray(bin : std_ulogic_vector) RETURN std_ulogic_vector;
+
+  FUNCTION gray2bin(gray : std_ulogic_vector) RETURN std_ulogic_vector;
+
+
 END PACKAGE;
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_misc.ALL;
 USE ieee.numeric_std.ALL;
 USE ieee.math_real.ALL;
 
@@ -125,12 +131,36 @@ PACKAGE BODY helpers IS
     VARIABLE res      : STRING(1 TO nibbles);
   BEGIN
     padded(vec'LENGTH-1 DOWNTO 0) := vec;
-    expanded := padded; 
+    expanded := padded;
     FOR i IN 0 TO nibbles-1 LOOP
       nibble := TO_INTEGER(UNSIGNED(expanded(i*4 TO i*4+3)));
       res(i+1) := hex_characters(nibble+1);
     END LOOP;
     RETURN res;
+  END FUNCTION;
+
+  FUNCTION bin2gray(bin : std_ulogic_vector) RETURN std_ulogic_vector IS
+    -- Translate range for safe indexing
+    CONSTANT bits : POSITIVE := bin'LENGTH;
+    CONSTANT vec  : std_ulogic_vector(bits-1 DOWNTO 0) := bin;
+    VARIABLE gray : std_ulogic_vector(bits-1 DOWNTO 0);
+  BEGIN
+    gray(bits-1) := vec(bits-1);
+    FOR i IN bits-2 DOWNTO 0 LOOP
+      gray(i) := vec(i) XOR vec(i+1);
+    END LOOP;
+    RETURN gray;
+  END FUNCTION;
+
+  FUNCTION gray2bin(gray : std_ulogic_vector) RETURN std_ulogic_vector IS
+    CONSTANT bits : POSITIVE := gray'LENGTH;
+    CONSTANT vec  : std_ulogic_vector(bits-1 DOWNTO 0) := gray;
+    VARIABLE bin  : std_ulogic_vector(bits-1 DOWNTO 0);
+  BEGIN
+    FOR i IN bin'LENGTH-1 DOWNTO 0 LOOP
+      bin(i) := xor_reduce(vec(bits-1 DOWNTO i));
+    END LOOP;
+    RETURN bin;
   END FUNCTION;
 
 END PACKAGE BODY;
