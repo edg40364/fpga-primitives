@@ -79,4 +79,15 @@ BEGIN
     WAIT;
   END PROCESS;
 
+  check_hex : PROCESS
+    CONSTANT expected : STRING := "3BADCAFE";
+    CONSTANT vector   : std_ulogic_vector(31 DOWNTO 0) := x"BBADCAFE";
+    VARIABLE result   : STRING(1 TO 8);
+  BEGIN
+    result := vec2hex(vector(30 DOWNTO 0));
+    ASSERT result = expected REPORT "Hex mismatch, expected " &
+      expected & ", got " & result SEVERITY ERROR;
+    WAIT;
+  END PROCESS;
+
 END ARCHITECTURE;
