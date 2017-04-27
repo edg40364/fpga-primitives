@@ -28,7 +28,7 @@ BEGIN
   test.helpers.clock(clk, 5 ns, 5 ns);
   reset <= '1', '0' AFTER 13 ns;
 
-  src : work.bfm.rnd_stream_src
+  src : work.stream.rnd_stream_src
   GENERIC MAP(
     test_words   => test_words,
     data_bits    => data_bits,
@@ -45,7 +45,7 @@ BEGIN
     done         => src_done
   );
 
-  sink : work.bfm.rnd_stream_sink
+  sink : work.stream.rnd_stream_sink
   GENERIC MAP(
     test_words   => test_words,
     data_bits    => data_bits,

@@ -1,7 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 
-PACKAGE bfm IS
+PACKAGE stream IS
 
   COMPONENT rnd_stream_src IS
   GENERIC(
